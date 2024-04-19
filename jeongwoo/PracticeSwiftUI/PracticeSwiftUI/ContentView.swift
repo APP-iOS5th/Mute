@@ -25,11 +25,31 @@ actor GithubService {
     }
 }
 
+@MainActor
+class GithubViewModel: ObservableObject {
+    @Published var user: User?
+    @Published var repositories: [Repository] = []
+    @Published var error: Error?
+
+    let githubService = GithubService()
+    
+    func fetchData(username: String) async {
+        do {
+            error = nil
+            async let fetchUser = githubService.fetchUser(username: username)
+            async let fetchRepositoris = githubService.fetchRepositories(username: username)
+            
+            user = try await fetchUser
+            repositories = try await fetchRepositoris
+        } catch {
+            self.error = error
+        }
+    }
+}
+
 struct ContentView: View {
     @State private var username = "jeongWo"
-    @State private var user: User?
-    @State private var repositories: [Repository] = []
-    let githubService = GithubService()
+    @StateObject private var viewModel = GithubViewModel()
     
     var body: some View {
         VStack {
@@ -37,20 +57,12 @@ struct ContentView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
             Button("Fetch Data") {
-                Task {
-                    do {
-                        async let fetchUser = githubService.fetchUser(username: username)
-                        async let fetchRepositoris = githubService.fetchRepositories(username: username)
-                        
-                        user = try await fetchUser
-                        repositories = try await fetchRepositoris
-                    } catch {
-                        print("Error: \(error)")
-                    }
+                Task.detached {
+                    await viewModel.fetchData(username: username)
                 }
             }
             
-            if let user = user {
+            if let user = viewModel.user {
                 AsyncImage(url: user.avatar_url) { image in
                     image.resizable()
                 } placeholder: {
@@ -63,7 +75,7 @@ struct ContentView: View {
                     .font(.title)
             }
             
-            List(repositories) { repo in
+            List(viewModel.repositories) { repo in
                 VStack(alignment: .leading) {
                     Text(repo.name)
                         .font(.headline)
@@ -72,9 +84,14 @@ struct ContentView: View {
                 }
             }
             
+            if let error = viewModel.error {
+                Text("Error: \(error.localizedDescription)")
+                    .foregroundColor(.red)
+            }
         }
     }
 }
+
 
 #Preview {
     ContentView()
