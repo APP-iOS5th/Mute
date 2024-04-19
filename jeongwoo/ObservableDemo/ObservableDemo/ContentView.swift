@@ -11,19 +11,20 @@ struct ContentView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding()
-                Button(action: resetCount) {
+                Button(action: timerData.resetCount) {
                     Text("Reset Counter")
                 }
-                NavigationLink(destination: SecondView (timerData: timerData)) {
+                NavigationLink(destination: SecondView()) {
                     Text("Next Screen")
                 }
                 .padding()
             }
         }
+        .environmentObject(timerData)
     }
-    func resetCount() {
-        timerData.resetCount()
-    }
+    //    func resetCount() {
+    //        timerData.resetCount()
+    //    }
 }
 
 #Preview {
