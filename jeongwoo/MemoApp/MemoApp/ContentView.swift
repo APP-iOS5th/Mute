@@ -44,9 +44,11 @@ struct ContentView: View {
                     .background(memoColor)
                     .shadow(radius: 5)
                     .padding()
-                    .contextMenu {
-                        Button(action: { removeMemo(memo) }) {
-                            Label("삭제", systemImage: "trash.slash")
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            removeMemo(memo)
+                        } label: {
+                            Label("Remove", systemImage: "trash.slash")
                         }
                     }
                 }
