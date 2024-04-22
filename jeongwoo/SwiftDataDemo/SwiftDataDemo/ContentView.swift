@@ -1,5 +1,7 @@
 import SwiftUI
+import SwiftData
 
+@Model
 class Task: Identifiable {
     var id: UUID
     var title: String
@@ -12,18 +14,13 @@ class Task: Identifiable {
     }
 }
 
+
+
 struct ContentView: View {
-    
-    @State var tasks: [Task] = [
-        Task(title: "Title1"),
-        Task(title: "Title2"),
-        Task(title: "Title3"),
-        Task(title: "Title4"),
-        Task(title: "Title5"),
-    ]
+    @Query var tasks: [Task]
+    @Environment(\.modelContext) var modelContext
     
     var body: some View {
-        
         NavigationStack {
             List {
                 ForEach(tasks) { task in
@@ -36,19 +33,19 @@ struct ContentView: View {
                     }
                 }
             }
-        }
-        .navigationTitle("Tasks")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: addTask) {
-                    Image(systemName: "plus")
+            .navigationTitle("Tasks")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: addTask) {
+                        Image(systemName: "plus")
+                    }
                 }
             }
         }
     }
     func addTask() {
-        let newTask = Task(title: "New task")
-        self.tasks.append(newTask)
+        let newTask = Task(title: "Task #\(tasks.count+1)")
+        modelContext.insert(newTask)
     }
 }
 
