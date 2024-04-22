@@ -1,21 +1,19 @@
-//
-//  ContentView.swift
-//  StorageDemo
-//
-//  Created by 김정우 on 4/22/24.
-//
-
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            SceneStorageView()
+                .tabItem {
+                    Image(systemName: "circle.fill")
+                    Text("SceneStorage")
+                }
+            AppStorageView()
+                .tabItem {
+                    Image(systemName: "square.fill")
+                    Text("AppStorage")
+                }
         }
-        .padding()
     }
 }
 
