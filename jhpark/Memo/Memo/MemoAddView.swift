@@ -25,7 +25,7 @@ struct MemoAddView: View {
                 Button("완료") {
                     // TODO: add Memo
 //                    modelContext.insert()
-                    addMemo(memoText/*, color: memoColor*/)
+                    addMemo(memoText, color: memoColor)
                     isSheetShowing = false
                 }
                 .disabled(memoText.isEmpty)
@@ -65,8 +65,8 @@ struct MemoAddView: View {
         .padding()
     }
     
-    func addMemo(_ text: String/*, color: Color*/) {
-        let memo: Memo = Memo(text: text, /*color: color,*/ created: Date())
+    func addMemo(_ text: String, color: Color) {
+        let memo: Memo = Memo(text: text, color: color, created: Date())
         modelContext.insert(memo)
     }
 }

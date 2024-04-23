@@ -30,7 +30,7 @@ struct ContentView: View {
                 }
                 .padding()
                 .foregroundColor(.white)
-                //                .background(memo.color)
+                .background(memo.color)
                 .shadow(radius: 3)
                 .padding()
                 // 꾹 눌렀을 때
