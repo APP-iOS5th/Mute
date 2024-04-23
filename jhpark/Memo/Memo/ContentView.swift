@@ -12,6 +12,10 @@ struct ContentView: View {
     @State var isSheetShowing: Bool = false
     
     @Environment(\.modelContext) var modelContext
+    // 메모의 텍스트 정렬(오름차순)
+//    @Query(sort: [SortDescriptor(\Memo.text, order: .forward)]) var memos: [Memo]
+    // 메모 만든 날짜순 정렬(오름차순(기본)
+//    @Query(sort: \Memo.created) var memos: [Memo]
     @Query var memos: [Memo]
     
     var body: some View {
@@ -66,5 +70,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Memo.self)
+        .modelContainer(for: Memo.self, inMemory: true) // 매모리 내에서 처리함을 명시적으로 나타냄(안써도 정상작동)
 }

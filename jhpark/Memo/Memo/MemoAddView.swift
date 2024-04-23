@@ -30,6 +30,9 @@ struct MemoAddView: View {
                 }
                 .disabled(memoText.isEmpty)
             }
+            // 컬러피커로 메모 색상 선택
+            ColorPicker("", selection: $memoColor)
+                .padding()
             HStack {
                 ForEach(colors, id: \.self) { color in
                     Button {
