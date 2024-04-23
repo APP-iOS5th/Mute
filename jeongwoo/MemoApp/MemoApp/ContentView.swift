@@ -2,111 +2,112 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Query var memos: [Memo]
     @Environment(\.modelContext) var modelContext
+    @Query var memos: [Memo]
     @State var isSheetShowing: Bool = false
-    @State var memoText: String = ""
-    @State var memoColor: Color = .blue
-    let colors: [Color] = [.blue, .cyan, .purple, .yellow, .indigo]
+    let memoManager = MemoManager()
     
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(memos) { memo in
-                    HStack {
-                        VStack {
-                            Text("\(memo.text)")
-                                .font(.title)
-                            Text("\(formattedDate(from: memo.created))")
-                                .font(.body)
-                                .padding(.top)
-                        }
+            List (memos) { memo in
+                HStack {
+                    VStack {
+                        Text("\(memo.text)")
+                            .font(.title)
+                        Text("\(memoManager.formattedDate(from: memo.created))")
+                            .font(.body)
+                            .padding(.top)
+                        
                         Spacer()
                     }
                     .padding()
                     .foregroundStyle(.white)
-                    .background(memoColor)
+                    .background()
                     .shadow(radius: 5)
                     .padding()
                     .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            removeMemo(memo)
+                        ShareLink(item: memo.text)
+                        Button {
+                            memoManager.removeMemo(memo)
                         } label: {
                             Label("Remove", systemImage: "trash.slash")
                         }
                     }
+                    Spacer()
                 }
+                
             }
             .listStyle(.plain)
             .navigationTitle("memo")
             .toolbar{
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("추가") {memoText = ""; isSheetShowing = true}
-                }
-            }
-            .sheet(isPresented: $isSheetShowing) {
-                NavigationView {
-                    MemoAddView(isSheetShowing: $isSheetShowing, memoText: $memoText, memoColor: $memoColor, colors: colors) { text, color in
-                        let colorString = color.description
-                        let memoColor = Color(colorString)
-                        addMemo(text, color: memoColor)
+                    Button("추가") {
+                        isSheetShowing = true
                     }
                 }
             }
+            .sheet(isPresented: $isSheetShowing) {
+                MemoAddView(isSheetShowing:$isSheetShowing)
+            }
         }
-    }
-    
-    func addMemo(_ text: String, color: Color) {
-        let colorString = color.description
-        let memo = Memo(text: text, color: colorString, created: Date())
-        modelContext.insert(memo)
-    }
-    
-    func removeMemo(_ targetMemo: Memo) {
-        modelContext.delete(targetMemo)
-    }
-    
-    func formattedDate(from date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
     }
 }
 
 struct MemoAddView: View {
+    @Environment(\.modelContext) var modelContext
     @Binding var isSheetShowing: Bool
-    @Binding var memoText: String
-    @Binding var memoColor: Color
-    let colors: [Color]
-    var onSave: (String, Color) -> Void
+    @State var memoColor: Color = .brown
+    @State var memoText: String = ""
+    let memoManager = MemoManager()
+    let colors: [Color] = [.blue, .cyan, .purple, .yellow, .indigo]
+    
     
     var body: some View {
         VStack {
-            Text("메모 추가")
-                .font(.title)
-                .padding()
-            TextField("메모를 입력하세요", text: $memoText)
-                .padding()
-            Picker(selection: $memoColor, label: Text("색상")) {
+            HStack {
+                Button("취소") {
+                    isSheetShowing = false
+                }
+                Spacer()
+                Button("저장") {
+                    memoManager.addMemo(memoText, color: memoColor)
+                    isSheetShowing = false
+                }
+                .disabled(memoText.isEmpty)
+            }
+            .padding()
+            
+            HStack {
                 ForEach(colors, id: \.self) { color in
-                    Text(color.description.capitalized)
-                        .foregroundColor(color)
-                        .tag(color)
+                    Button {
+                        memoColor = color
+                    } label: {
+                        HStack {
+                            Spacer()
+                            if color == memoColor {
+                                Image(systemName: "checkmark")
+                            }
+                            Spacer()
+                        }
+                        .frame(height: 40)
+                        .background(color)
+                        .foregroundStyle(.white)
+                        .shadow(radius: color == memoColor ? 8 : 0)
+                    }
                 }
             }
-            .pickerStyle(SegmentedPickerStyle())
             .padding()
-            Spacer()
-            Button("저장") {
-                onSave(memoText, memoColor)
-                isSheetShowing = false
+            Divider()
+                .padding()
+            VStack {
+                TextField("내용을 입력하세요", text: $memoText, axis: .vertical)
+                    .padding()
+                    .foregroundStyle(memoColor)
+                    .shadow(radius: 4)
             }
             .padding()
+            Spacer()
         }
-        .navigationTitle("새 메모")
-        .navigationBarItems(trailing: Button("닫기") {
-            isSheetShowing = false
-        })
     }
 }
 
