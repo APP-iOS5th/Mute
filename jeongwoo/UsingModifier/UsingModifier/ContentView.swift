@@ -22,7 +22,7 @@ extension View {
 struct ContentView: View {
     var body: some View {
         VStack {
-            Text("Perfect").modifier(BackgroundStyle(bgColor: .green))
+            Text("Perfect").customBackgroundStyle(color: .green)
         }
         .padding()
     }
