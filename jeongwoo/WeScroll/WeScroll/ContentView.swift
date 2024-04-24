@@ -36,7 +36,7 @@ struct ContentView: View {
                 flashIndicators.toggle()
             }
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(.hidden, axes: [.vertical, .horizontal])
     }
 }
 
