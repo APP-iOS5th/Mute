@@ -5,6 +5,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             ActivityIndicator(animating: animate)
+            ProgressView()
             HStack {
                 Toggle(isOn: $animate) {
                     Text("Toggle Activity")
