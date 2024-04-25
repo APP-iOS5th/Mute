@@ -1,17 +1,28 @@
 import Foundation
 
-enum Priority: Comparable {
-    case high
-    case medium
-    case low
+enum Priority: Int, Comparable {
+    case low = 0
+    case medium = 1
+    case high = 2
+    
+    static func < (lhs: Priority, rhs: Priority) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
 }
 
-struct TaskModel: Identifiable {
+struct TaskModel: Identifiable, Comparable {
     var id = UUID()
     var completed: Bool
     var description: String
     var priority: Priority
     
+    static func < (lhs: TaskModel, rhs: TaskModel) -> Bool {
+        if lhs.priority != rhs.priority {
+            return lhs.priority < rhs.priority
+        } else {
+            return !lhs.completed && rhs.completed
+        }
+    }
 }
 
 extension TaskModel {

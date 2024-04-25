@@ -1,11 +1,13 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var tasks = TaskModel.tasks 
+    
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List {
-                ForEach(TaskModel.tasks) { task in
-                    TaskRow(task: task)
+                ForEach($tasks) { $task in
+                    TaskRow(task: $task)
                 }
             }
             .navigationTitle("To Do List")
