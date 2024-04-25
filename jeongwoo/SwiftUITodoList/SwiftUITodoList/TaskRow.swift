@@ -1,16 +1,15 @@
 import SwiftUI
 
 struct TaskRow: View {
-    var task: TaskModel
+    @State var task: TaskModel
     
     var body: some View {
         HStack {
-            if task.completed {
-                Image(systemName: "largecircle.fill.circle")
-                    .foregroundStyle(.blue)
-            } else {
-                Image(systemName: "circle")
-                    .foregroundColor(.red)
+            Button(action: {
+                task.toggleCompletion()
+            }) {
+                Image(systemName: task.completed ? "largecircle.fill.circle" : "circle")
+                    .foregroundColor(.blue)
             }
             Text(task.description)
             Spacer()
