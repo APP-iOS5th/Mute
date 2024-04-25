@@ -23,5 +23,7 @@ extension TaskModel {
         TaskModel(completed: false, description: "Sleep", priority: .high),
         TaskModel(completed: false, description: "Get groceries", priority: .high)
     ]
-    static var task = tasks[0]
+    mutating func toggleCompletion() {
+            completed.toggle()
+        }
 }
