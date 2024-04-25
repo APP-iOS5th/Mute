@@ -9,9 +9,11 @@ struct TaskRow: View {
                 task.toggleCompletion()
             }) {
                 Image(systemName: task.completed ? "largecircle.fill.circle" : "circle")
-                    .foregroundColor(.blue)
+                    .foregroundColor(task.completed ? .blue : .red)
             }
-            Text(task.description)
+            Spacer()
+            Text(task.completed ? task.description : task.description)
+                .strikethrough(task.completed)
             Spacer()
             Text(task.priority == .high ? "High" : task.priority == .medium ? "Medium" : "Low")
         }
