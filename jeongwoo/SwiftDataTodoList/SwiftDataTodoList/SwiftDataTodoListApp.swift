@@ -1,10 +1,3 @@
-//
-//  SwiftDataTodoListApp.swift
-//  SwiftDataTodoList
-//
-//  Created by 김정우 on 4/25/24.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -12,7 +5,7 @@ import SwiftData
 struct SwiftDataTodoListApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Task.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -26,7 +19,28 @@ struct SwiftDataTodoListApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    initialzeData()
+                }
         }
         .modelContainer(sharedModelContainer)
+    }
+    
+    @MainActor private func initialzeData() {
+        do {
+            let fetchDescriptor = FetchDescriptor<Task>()
+            let fetchTasks = try sharedModelContainer.mainContext.fetch(fetchDescriptor)
+            
+            if fetchTasks.isEmpty {
+                for task in Task.tasks {
+                    sharedModelContainer.mainContext.insert(task)
+                }
+            }
+            
+            
+        } catch {
+            print("Failed \(error)")
+        }
+        
     }
 }
