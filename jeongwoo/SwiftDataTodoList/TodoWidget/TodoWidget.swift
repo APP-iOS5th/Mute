@@ -1,33 +1,36 @@
 import WidgetKit
 import SwiftUI
+import SwiftData
 
-struct Provider: AppIntentTimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
+struct TaskEntry: TimelineEntry {
+    let date: Date
+    let task: Task
+}
+
+struct Provider: TimelineProvider {
+    func placeholder(in context: Context) -> TaskEntry {
+        TaskEntry(date: Date(), task: .task)
     }
 
-    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration)
+    func getSnapshot(in context: Context, completion: @escaping (TaskEntry) -> ()) {
+        let entry = TaskEntry(date: Date(), task: .task)
+        completion(entry)
     }
-    
-    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
+        var entries: [TaskEntry] = []
 
         // Generate a timeline consisting of five entries an hour apart, starting from the current date.
         let currentDate = Date()
         for hourOffset in 0 ..< 5 {
             let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
+            let entry = TaskEntry(date: entryDate, task: .task)
             entries.append(entry)
         }
 
-        return Timeline(entries: entries, policy: .atEnd)
+        let timeline = Timeline(entries: entries, policy: .atEnd)
+        completion(timeline)
     }
-}
-
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let configuration: ConfigurationAppIntent
 }
 
 struct TodoWidgetEntryView : View {
@@ -38,40 +41,50 @@ struct TodoWidgetEntryView : View {
             Text("Time:")
             Text(entry.date, style: .time)
 
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
+            Text("Task:")
+            Text(entry.task.text)
         }
     }
 }
 
 struct TodoWidget: Widget {
     let kind: String = "TodoWidget"
+    var sharedModelContainer: ModelContainer = {
+        let schema = Schema([
+            Task.self,
+        ])
+
+        let modelConfiguration = ModelConfiguration(schema: schema)
+        
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }()
+
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
-            TodoWidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+            if #available(iOS 17.0, *) {
+                TodoWidgetEntryView(entry: entry)
+                    .containerBackground(.fill.tertiary, for: .widget)
+                    .modelContainer(sharedModelContainer)
+            } else {
+                TodoWidgetEntryView(entry: entry)
+                    .padding()
+                    .background()
+            }
         }
-    }
-}
-
-extension ConfigurationAppIntent {
-    fileprivate static var smiley: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "😀"
-        return intent
-    }
-    
-    fileprivate static var starEyes: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "🤩"
-        return intent
+        .configurationDisplayName("My Widget")
+        .description("This is an example widget.")
     }
 }
 
 #Preview(as: .systemSmall) {
     TodoWidget()
 } timeline: {
-    SimpleEntry(date: .now, configuration: .smiley)
-    SimpleEntry(date: .now, configuration: .starEyes)
+    TaskEntry(date: Date(), task: Task(text: "Wake up", priority: .low))
+    TaskEntry(date: Date(), task: Task(text:"Shower", priority: .medium))
+    TaskEntry(date: Date(), task: Task(text: "Code", priority: .high))
 }
