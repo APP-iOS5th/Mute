@@ -13,13 +13,19 @@ struct SignUpView: View {
     @State private var lessThenTwo = false
     @State private var username = ""
     @State private var password = ""
-    
+    @State private var usernameErrorMessage = ""
     
     var body: some View {
         NavigationStack {
             Form {
                 Section("Name") {
                     TextField("First Name", text: $firstName)
+                        .border(.red)
+                    if !usernameErrorMessage.isEmpty {
+                        Text(usernameErrorMessage)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
                     TextField("Last Name", text: $lastName)
                 }
                 Section("Current Address") {
@@ -42,6 +48,7 @@ struct SignUpView: View {
                     TextField("Create Password", text: $password)
                 }
                 Button("Submit") {
+                    usernameErrorMessage = "Username을 입력하세요"
                     print("Form Submit action here")
                 }
             }
